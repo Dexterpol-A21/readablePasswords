@@ -18,26 +18,54 @@ const pool = new Pool({
     }
 });
 
-// Enhanced CORS configuration for production
+// CORS configuration SIMPLIFICADA para arreglar el error
 app.use(cors({
     origin: [
-        // Development URLs (mantener para desarrollo local)
         'http://localhost:3000', 
         'http://127.0.0.1:3000', 
         'http://localhost:5500', 
         'http://127.0.0.1:5500',
-        
-        // Production URLs
-        'https://readablepasswords.onrender.com', // Backend URL (para servir frontend desde backend)
-        
-        // Hostinger URLs - REEMPLAZA CON TU DOMINIO REAL
+        'https://readablepasswords.onrender.com',
         'https://lightslategrey-tarsier-553107.hostingersite.com',
-        'https://www.lightslategrey-tarsier-553107.hostingersite.com'
+        'https://www.lightslategrey-tarsier-553107.hostingersite.com',
+        'http://lightslategrey-tarsier-553107.hostingersite.com',
+        'http://www.lightslategrey-tarsier-553107.hostingersite.com'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
 }));
+
+// Middleware adicional para headers CORS
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const allowedOrigins = [
+        'http://localhost:3000', 
+        'http://127.0.0.1:3000', 
+        'http://localhost:5500', 
+        'http://127.0.0.1:5500',
+        'https://readablepasswords.onrender.com',
+        'https://lightslategrey-tarsier-553107.hostingersite.com',
+        'https://www.lightslategrey-tarsier-553107.hostingersite.com',
+        'http://lightslategrey-tarsier-553107.hostingersite.com',
+        'http://www.lightslategrey-tarsier-553107.hostingersite.com'
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+        return;
+    }
+    
+    next();
+});
 
 // Middleware
 app.use(express.json());
@@ -45,7 +73,7 @@ app.use(express.static(path.join(__dirname, '../')));
 
 // Add request logging
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
     next();
 });
 
@@ -368,7 +396,8 @@ app.use((req, res) => {
 app.listen(PORT, async () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📁 Serving static files from: ${path.join(__dirname, '../')}`);
-    console.log(`🌐 CORS enabled for local development`);
+    console.log(`🌐 CORS enabled for production domains`);
+    console.log(`🔗 Allowed origins: lightslategrey-tarsier-553107.hostingersite.com`);
     
     // Validate encryption key
     console.log(`🔐 Encryption key length: ${ENCRYPTION_KEY ? ENCRYPTION_KEY.length : 'NOT SET'} characters`);
