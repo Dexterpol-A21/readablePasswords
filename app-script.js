@@ -177,21 +177,22 @@ class ReadablePasswordManager {
             });
 
             console.log('📊 Response status:', response.status);
-            console.log('📋 Response headers:', Object.fromEntries(response.headers.entries()));
+            console.log('📋 Response ok:', response.ok);
 
             if (response.ok) {
                 const data = await response.json();
                 this.savedPasswords = data;
                 console.log('✅ Contraseñas cargadas:', this.savedPasswords.length);
+                console.log('📄 Datos recibidos:', this.savedPasswords);
                 this.displaySavedPasswords();
             } else {
-                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                console.error('❌ Load error:', response.status, errorData);
-                this.showToast(`Error del servidor: ${errorData.error || response.status}`, 'error');
+                const errorText = await response.text();
+                console.error('❌ Load error:', response.status, errorText);
+                this.showToast(`Error del servidor: ${response.status}`, 'error');
             }
         } catch (error) {
             console.error('❌ Network error loading passwords:', error);
-            this.showToast('Error de conexión con el servidor. Verifica que el backend esté funcionando.', 'error');
+            this.showToast('Error de conexión con el servidor', 'error');
             
             // Show empty state instead of error state
             this.displaySavedPasswords([]);
@@ -199,6 +200,8 @@ class ReadablePasswordManager {
     }
 
     displaySavedPasswords(passwords = this.savedPasswords) {
+        console.log('🎨 Displaying passwords:', passwords.length);
+        
         if (!this.passwordsList) {
             console.error('❌ passwordsList element not found');
             return;
@@ -213,12 +216,15 @@ class ReadablePasswordManager {
 
         passwords.forEach((password, index) => {
             try {
+                console.log(`🎯 Creating item ${index}:`, password.label);
                 const item = this.createPasswordItem(password);
                 this.passwordsList.appendChild(item);
             } catch (error) {
-                console.error(`Error creating password item ${index}:`, error);
+                console.error(`❌ Error creating password item ${index}:`, error);
             }
         });
+        
+        console.log('✅ All password items displayed');
     }
 
     createPasswordItem(password) {
@@ -335,9 +341,6 @@ class ReadablePasswordManager {
         } catch (error) {
             console.error('❌ Auth check error:', error);
             this.showToast('Error de conexión con el servidor', 'error');
-            
-            // Don't logout immediately on network errors in production
-            // this.logout();
         }
     }
 
@@ -1121,9 +1124,9 @@ class ReadablePasswordManager {
                 this.passwordLabel.value = '';
                 this.loadSavedPasswords();
             } else {
-                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                console.error('❌ Save error:', response.status, errorData);
-                this.showToast(errorData.error || `Error del servidor (${response.status})`, 'error');
+                const errorText = await response.text();
+                console.error('❌ Save error:', response.status, errorText);
+                this.showToast(`Error del servidor (${response.status})`, 'error');
             }
         } catch (error) {
             console.error('❌ Network error saving:', error);
@@ -1325,6 +1328,65 @@ class ReadablePasswordManager {
         }
 
         return word + selectedEnding;
+    }
+
+    generatePassword() {
+        const length = parseInt(this.passwordLength.value);
+        const options = {
+            includeUppercase: this.includeUppercase.checked,
+            includeLowercase: this.includeLowercase.checked,
+            includeNumbers: this.includeNumbers.checked,
+            includeSymbols: this.includeSymbols.checked,
+            useComplexSyllables: this.useComplexSyllables?.checked || false,
+            capitalizeFirst: this.capitalizeFirst?.checked || true,
+            addEndings: this.addEndings?.checked || false,
+            useRhythm: this.useRhythm?.checked || false
+        };
+
+        // Calculate space allocation
+        const securityCharsNeeded = (options.includeNumbers ? 2 : 0) + (options.includeSymbols ? 1 : 0);
+        const baseWordLength = Math.max(4, length - securityCharsNeeded);
+        
+        // Generate Spanish word with advanced options
+        let readableWord = this.generateSpanishWord(baseWordLength);
+        
+        // Apply capitalization based on user preference
+        if (options.includeUppercase) {
+            if (options.capitalizeFirst) {
+                // Only capitalize first letter for readability
+                readableWord = readableWord.charAt(0).toUpperCase() + readableWord.slice(1);
+            } else {
+                // Random capitalization for more security
+                readableWord = this.applyRandomCapitalization(readableWord);
+            }
+        }
+
+        // Apply selective leet speak
+        if (Math.random() < 0.3) {
+            readableWord = this.applyReadableLeetSpeak(readableWord, 1);
+        }
+
+        // Build final password
+        let password = readableWord;
+
+        // Add security characters
+        if (options.includeNumbers) {
+            const numbers = this.generateMeaningfulNumbers();
+            password = this.insertSecurityChars(password, numbers, length);
+        }
+
+        if (options.includeSymbols) {
+            const symbol = this.getRandomElement(['!', '@', '#', '$', '%', '&', '*']);
+            password = this.insertSecurityChars(password, symbol, length);
+        }
+
+        // Adjust to exact length
+        password = this.adjustToExactLength(password, length, readableWord);
+
+        const strengthScore = this.calculateStrength(password);
+        const phoneticAnalysis = this.analyzePhoneticCharacteristics(password, readableWord);
+
+        this.displayGeneratedPassword(password, strengthScore, phoneticAnalysis);
     }
 
     applyRandomCapitalization(word) {
