@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Readable Passwords - Gestor de Contraseñas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="app-styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>🔐 Readable Passwords</h1>
+                <div class="user-section">
+                    <span class="welcome-text">Bienvenido, <span id="username"></span></span>
+                    <button id="logoutBtn" class="logout-btn">Cerrar Sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Password Generator Section -->
+            <section class="generator-section">
+                <div class="card">
+                    <h2>🎯 Generar Nueva Contraseña</h2>
+                    <div class="generator-form">
+                        <div class="input-group">
+                            <label for="passwordLabel">Etiqueta (opcional):</label>
+                            <input type="text" id="passwordLabel" placeholder="Ej: Gmail, Facebook, Trabajo...">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="passwordLength">Longitud:</label>
+                            <div class="length-display">
+                                <input type="range" id="passwordLength" min="8" max="32" value="12">
+                                <span id="lengthValue">12</span>
+                            </div>
+                        </div>
+
+                        <div class="options-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeUppercase" checked>
+                                <span class="checkmark"></span>
+                                Mayúsculas (A-Z)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeLowercase" checked>
+                                <span class="checkmark"></span>
+                                Minúsculas (a-z)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeNumbers" checked>
+                                <span class="checkmark"></span>
+                                Números (0-9)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeSymbols">
+                                <span class="checkmark"></span>
+                                Símbolos (!@#$...)
+                            </label>
+                        </div>
+
+                        <!-- Advanced Spanish Options -->
+                        <div class="advanced-options">
+                            <h4>🔤 Opciones Fonéticas Avanzadas:</h4>
+                            <div class="options-grid">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="useComplexSyllables" checked>
+                                    <span class="checkmark"></span>
+                                    Sílabas complejas (bra, cla, tri...)
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="capitalizeFirst" checked>
+                                    <span class="checkmark"></span>
+                                    Capitalizar primera letra
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="addEndings" checked>
+                                    <span class="checkmark"></span>
+                                    Añadir terminaciones (-ar, -er, -ir...)
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="useRhythm">
+                                    <span class="checkmark"></span>
+                                    Patrón rítmico (consonante-vocal)
+                                </label>
+                            </div>
+                        </div>
+
+                        <button id="generateBtn" class="primary-btn">🎲 Generar Contraseña</button>
+                    </div>
+
+                    <!-- Generated Password Display -->
+                    <div id="passwordResult" class="password-result hidden">
+                        <div class="password-display">
+                            <div class="password-text">
+                                <strong>Contraseña:</strong>
+                                <span id="generatedPassword"></span>
+                                <button id="copyPassword" class="copy-btn" title="Copiar">📋</button>
+                            </div>
+                            
+                            <!-- Phonetic Characteristics Section -->
+                            <div class="phonetic-characteristics">
+                                <strong>Características Fonéticas:</strong>
+                                <div class="characteristics-grid">
+                                    <div class="characteristic-item">
+                                        <span class="char-label">Sílabas:</span>
+                                        <span id="syllableCount" class="char-value">0</span>
+                                    </div>
+                                    <div class="characteristic-item">
+                                        <span class="char-label">Pronunciable:</span>
+                                        <span id="pronounceable" class="char-value">Sí</span>
+                                    </div>
+                                    <div class="characteristic-item">
+                                        <span class="char-label">Longitud:</span>
+                                        <span id="passwordLengthDisplay" class="char-value">0</span>
+                                    </div>
+                                    <div class="characteristic-item">
+                                        <span class="char-label">Memorizable:</span>
+                                        <span id="memorability" class="char-value">Alta</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="strength-meter">
+                                <strong>Fortaleza:</strong>
+                                <div class="strength-bar">
+                                    <div id="strengthFill" class="strength-fill"></div>
+                                </div>
+                                <span id="strengthText"></span>
+                            </div>
+                        </div>
+                        <button id="savePassword" class="save-btn">💾 Guardar Contraseña</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Saved Passwords Section -->
+            <section class="saved-section">
+                <div class="card">
+                    <div class="section-header">
+                        <h2>🗂️ Contraseñas Guardadas</h2>
+                        <button id="refreshPasswords" class="refresh-btn">🔄 Actualizar</button>
+                    </div>
+                    
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="🔍 Buscar contraseñas...">
+                    </div>
+
+                    <div id="passwordsList" class="passwords-list">
+                        <div class="loading">Cargando contraseñas...</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Password Item Template -->
+        <template id="passwordItemTemplate">
+            <div class="password-item">
+                <div class="password-header">
+                    <h3 class="password-label"></h3>
+                    <div class="password-actions">
+                        <button class="action-btn copy-password-btn" title="Copiar contraseña">📋</button>
+                        <button class="action-btn delete-btn" title="Eliminar">🗑️</button>
+                    </div>
+                </div>
+                <div class="password-details">
+                    <div class="password-field">
+                        <span class="field-label">Contraseña:</span>
+                        <span class="field-value password-hidden">••••••••</span>
+                        <button class="toggle-visibility" title="Mostrar/Ocultar">👁️</button>
+                    </div>
+                    <div class="password-meta">
+                        <span class="strength-badge"></span>
+                        <span class="created-date"></span>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Toast Notifications -->
+        <div id="toast" class="toast hidden">
+            <span id="toastMessage"></span>
+        </div>
+        
+        <!-- Educational Section -->
+        <div class="educational-section">
+            <button id="toggleEducation" class="education-toggle-btn">
+                📚 ¿Cómo funciona esta aplicación?
+            </button>
+            
+            <div id="educationalContent" class="education-content hidden">
+                <div class="education-card">
+                    <div class="education-header">
+                        <h2>🔬 Proyecto </h2>
+                        <p class="education-subtitle">Proyecto 3er parcial - Programación concurrente</p>
+                    </div>
+                    
+                    <div class="education-grid">
+                        <!-- Seguridad Section -->
+                        <div class="education-topic">
+                            <h3>🔐 Seguridad de Contraseñas</h3>
+                            
+                            <div class="security-comparison">
+                                <div class="security-type">
+                                    <h4>👤 Contraseñas de Usuario</h4>
+                                    <div class="security-details">
+                                        <div class="security-method">
+                                            <span class="method-label">Método:</span>
+                                            <span class="method-value">bcrypt hashing</span>
+                                        </div>
+                                        <div class="security-feature">
+                                            <span class="feature-icon">🔒</span>
+                                            <span>No reversibles - imposible ver la contraseña original</span>
+                                        </div>
+                                        <div class="security-feature">
+                                            <span class="feature-icon">🧂</span>
+                                            <span>Salted hashing - cada hash es único</span>
+                                        </div>
+                                        <div class="security-feature">
+                                            <span class="feature-icon">⚖️</span>
+                                            <span>Verificación por comparación segura</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="security-type">
+                                    <h4>🗝️ Contraseñas Generadas</h4>
+                                    <div class="security-details">
+                                        <div class="security-method">
+                                            <span class="method-label">Método:</span>
+                                            <span class="method-value">AES-256-CBC</span>
+                                        </div>
+                                        <div class="security-feature">
+                                            <span class="feature-icon">🔓</span>
+                                            <span>Reversibles - podemos mostrarlas al usuario</span>
+                                        </div>
+                                        <div class="security-feature">
+                                            <span class="feature-icon">🔑</span>
+                                            <span>Clave de 32 caracteres para máxima seguridad</span>
+                                        </div>
+                                        <div class="security-feature">
+                                            <span class="feature-icon">🎲</span>
+                                            <span>IV único para cada contraseña</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="comparison-table">
+                                <h4>📋 Tabla Comparativa</h4>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Método</th>
+                                            <th>¿Reversible?</th>
+                                            <th>Propósito</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Contraseña de usuario</td>
+                                            <td>bcrypt hash</td>
+                                            <td><span class="reversible-no">❌ No</span></td>
+                                            <td>Autenticación segura</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Contraseñas generadas</td>
+                                            <td>AES-256 encriptación</td>
+                                            <td><span class="reversible-yes">✅ Sí</span></td>
+                                            <td>Almacenamiento recuperable</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Generation Algorithm Section -->
+                        <div class="education-topic">
+                            <h3>🎯 Algoritmo de Generación</h3>
+                            
+                            <div class="algorithm-steps">
+                                <div class="algorithm-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <h4>Análisis Fonético Español</h4>
+                                        <p>Generamos palabras siguiendo reglas fonéticas del español para máxima legibilidad</p>
+                                        <ul class="step-features">
+                                            <li>Evita combinaciones imposibles como "cv", "kv"</li>
+                                            <li>Permite combinaciones naturales como "ll", "rr", "ch"</li>
+                                            <li>Usa patrones consonante-vocal típicos del español</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="algorithm-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <h4>Sílabas Complejas</h4>
+                                        <p>Incorpora sílabas complejas para mayor naturalidad</p>
+                                        <div class="syllable-examples">
+                                            <span class="syllable">bra</span>
+                                            <span class="syllable">cla</span>
+                                            <span class="syllable">tri</span>
+                                            <span class="syllable">pro</span>
+                                            <span class="syllable">fra</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="algorithm-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <h4>Seguridad Inteligente</h4>
+                                        <p>Añade números y símbolos sin romper la legibilidad</p>
+                                        <ul class="step-features">
+                                            <li>Evita patrones secuenciales (123, 456)</li>
+                                            <li>Evita números repetitivos (111, 222)</li>
+                                            <li>Coloca elementos de seguridad estratégicamente</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Architecture Section -->
+                        <div class="education-topic">
+                            <h3>🏗️ Arquitectura del Sistema</h3>
+                            
+                            <div class="architecture-diagram">
+                                <div class="arch-layer">
+                                    <h4>🖥️ Frontend (Cliente)</h4>
+                                    <p class="layer-description">Interfaz de usuario que ejecuta en el navegador</p>
+                                    <div class="arch-components">
+                                        <div class="component-detailed">
+                                            <span class="component">HTML5</span>
+                                            <span class="component-purpose">Estructura y contenido de las páginas</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">CSS3</span>
+                                            <span class="component-purpose">Diseño visual y responsive</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">JavaScript ES6+</span>
+                                            <span class="component-purpose">Lógica de generación de contraseñas</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">Fetch API</span>
+                                            <span class="component-purpose">Comunicación con el servidor</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="arch-arrow">
+                                    <span class="arrow-icon">⬇️</span>
+                                    <span class="arrow-text">HTTPS/SSL</span>
+                                </div>
+                                
+                                <div class="arch-layer">
+                                    <h4>⚙️ Backend (Servidor)</h4>
+                                    <p class="layer-description">API REST que maneja autenticación y datos</p>
+                                    <div class="arch-components">
+                                        <div class="component-detailed">
+                                            <span class="component">Node.js</span>
+                                            <span class="component-purpose">Runtime JavaScript del servidor</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">Express.js</span>
+                                            <span class="component-purpose">Framework web para APIs REST</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">JWT Auth</span>
+                                            <span class="component-purpose">Tokens seguros sin sesiones</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">bcrypt</span>
+                                            <span class="component-purpose">Hash seguro de contraseñas</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">AES-256-CBC</span>
+                                            <span class="component-purpose">Encriptación de contraseñas guardadas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="arch-arrow">
+                                    <span class="arrow-icon">⬇️</span>
+                                    <span class="arrow-text">TCP/SSL</span>
+                                </div>
+                                
+                                <div class="arch-layer">
+                                    <h4>🗄️ Base de Datos</h4>
+                                    <p class="layer-description">Almacenamiento persistente y seguro</p>
+                                    <div class="arch-components">
+                                        <div class="component-detailed">
+                                            <span class="component">PostgreSQL</span>
+                                            <span class="component-purpose">Base de datos relacional robusta</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">SSL/TLS</span>
+                                            <span class="component-purpose">Encriptación en tránsito</span>
+                                        </div>
+                                        <div class="component-detailed">
+                                            <span class="component">Render Cloud</span>
+                                            <span class="component-purpose">Hosting en la nube escalable</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Data Flow Explanation -->
+                            <div class="data-flow-section">
+                                <h4>🔄 Flujo de Datos</h4>
+                                <div class="flow-steps">
+                                    <div class="flow-step">
+                                        <div class="flow-number">1</div>
+                                        <div class="flow-description">
+                                            <strong>Usuario genera contraseña:</strong> JavaScript ejecuta algoritmo fonético en el cliente
+                                        </div>
+                                    </div>
+                                    <div class="flow-step">
+                                        <div class="flow-number">2</div>
+                                        <div class="flow-description">
+                                            <strong>Solicitud HTTPS:</strong> Fetch API envía datos al servidor con token JWT
+                                        </div>
+                                    </div>
+                                    <div class="flow-step">
+                                        <div class="flow-number">3</div>
+                                        <div class="flow-description">
+                                            <strong>Validación y encriptación:</strong> Express valida token, encripta con AES-256
+                                        </div>
+                                    </div>
+                                    <div class="flow-step">
+                                        <div class="flow-number">4</div>
+                                        <div class="flow-description">
+                                            <strong>Almacenamiento:</strong> PostgreSQL guarda datos encriptados de forma persistente
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Security Layers -->
+                            <div class="security-layers">
+                                <h4>🛡️ Capas de Seguridad</h4>
+                                <div class="security-grid">
+                                    <div class="security-layer">
+                                        <span class="security-icon">🔐</span>
+                                        <div class="security-content">
+                                            <strong>Autenticación</strong>
+                                            <p>JWT tokens con expiración</p>
+                                        </div>
+                                    </div>
+                                    <div class="security-layer">
+                                        <span class="security-icon">🧂</span>
+                                        <div class="security-content">
+                                            <strong>Hashing</strong>
+                                            <p>bcrypt con salt automático</p>
+                                        </div>
+                                    </div>
+                                    <div class="security-layer">
+                                        <span class="security-icon">🔒</span>
+                                        <div class="security-content">
+                                            <strong>Encriptación</strong>
+                                            <p>AES-256 con IV único</p>
+                                        </div>
+                                    </div>
+                                    <div class="security-layer">
+                                        <span class="security-icon">🌐</span>
+                                        <div class="security-content">
+                                            <strong>Transporte</strong>
+                                            <p>HTTPS/TLS en toda comunicación</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app-script.js"></script>
+</body>
+</html>
