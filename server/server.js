@@ -18,18 +18,23 @@ const pool = new Pool({
     }
 });
 
-// CORS configuration SIMPLIFICADA para arreglar el error
+// CORS configuration - SOLO para Backend API
 app.use(cors({
     origin: [
+        // Development URLs
         'http://localhost:3000', 
         'http://127.0.0.1:3000', 
         'http://localhost:5500', 
         'http://127.0.0.1:5500',
-        'https://readablepasswords.onrender.com',
+        
+        // Tu frontend en Hostinger (CAMBIA por tu dominio real)
         'https://lightslategrey-tarsier-553107.hostingersite.com',
         'https://www.lightslategrey-tarsier-553107.hostingersite.com',
         'http://lightslategrey-tarsier-553107.hostingersite.com',
-        'http://www.lightslategrey-tarsier-553107.hostingersite.com'
+        'http://www.lightslategrey-tarsier-553107.hostingersite.com',
+        
+        // Solo si necesitas que Render sirva archivos estáticos de prueba
+        'https://readablepasswords.onrender.com'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -44,11 +49,11 @@ app.use((req, res, next) => {
         'http://127.0.0.1:3000', 
         'http://localhost:5500', 
         'http://127.0.0.1:5500',
-        'https://readablepasswords.onrender.com',
         'https://lightslategrey-tarsier-553107.hostingersite.com',
         'https://www.lightslategrey-tarsier-553107.hostingersite.com',
         'http://lightslategrey-tarsier-553107.hostingersite.com',
-        'http://www.lightslategrey-tarsier-553107.hostingersite.com'
+        'http://www.lightslategrey-tarsier-553107.hostingersite.com',
+        'https://readablepasswords.onrender.com'
     ];
     
     if (allowedOrigins.includes(origin)) {
@@ -394,10 +399,10 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, async () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📁 Serving static files from: ${path.join(__dirname, '../')}`);
-    console.log(`🌐 CORS enabled for production domains`);
-    console.log(`🔗 Allowed origins: lightslategrey-tarsier-553107.hostingersite.com`);
+    console.log(`🚀 API Server running on http://localhost:${PORT}`);
+    console.log(`🌐 CORS enabled for frontend domains`);
+    console.log(`🔗 Frontend allowed: lightslategrey-tarsier-553107.hostingersite.com`);
+    console.log(`📡 Backend API URL: https://readablepasswords.onrender.com`);
     
     // Validate encryption key
     console.log(`🔐 Encryption key length: ${ENCRYPTION_KEY ? ENCRYPTION_KEY.length : 'NOT SET'} characters`);
