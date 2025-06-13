@@ -2,7 +2,7 @@ class ReadablePasswordManager {
     constructor() {
         this.token = localStorage.getItem('auth_token');
         // PRODUCTION: Replace with your actual Render backend URL
-        this.apiBase = 'https://your-backend-app-name.onrender.com/api';
+        this.apiBase = 'https://readablepasswords.onrender.com/api';
         this.currentUser = null;
         this.savedPasswords = [];
         
@@ -169,15 +169,11 @@ class ReadablePasswordManager {
         }
 
         try {
-            // Remove these console.log statements for production
-            // console.log('Verificando autenticación...');
             const response = await fetch(`${this.apiBase}/passwords`, {
                 headers: {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
-
-            // console.log('Estado de autenticación:', response.status);
 
             if (response.ok) {
                 // Decode user info from token
@@ -188,15 +184,14 @@ class ReadablePasswordManager {
                     email: payload.email
                 };
                 this.usernameSpan.textContent = this.currentUser.username;
-                // console.log('Usuario autenticado:', this.currentUser.username);
                 this.loadSavedPasswords();
             } else {
-                // console.error('Token inválido, redirigiendo al login');
                 this.logout();
             }
         } catch (error) {
-            // console.error('Error verificando autenticación:', error);
-            this.showToast('Error de conexión. ¿Está el servidor ejecutándose?', 'error');
+            this.showToast('Error de conexión con el servidor', 'error');
+            // No redirigir inmediatamente para debugging
+            console.error('Auth error:', error);
         }
     }
 
@@ -955,13 +950,6 @@ class ReadablePasswordManager {
         this.savePassword.textContent = '💾 Guardando...';
 
         try {
-            // Remove console.log for production
-            // console.log('Enviando datos al servidor:', {
-            //     label,
-            //     passwordLength: password.length,
-            //     strengthScore
-            // });
-
             const response = await fetch(`${this.apiBase}/passwords`, {
                 method: 'POST',
                 headers: {
@@ -976,19 +964,18 @@ class ReadablePasswordManager {
                 })
             });
 
-            const data = await response.json();
-            // console.log('Respuesta del servidor:', data);
-
             if (response.ok) {
+                const data = await response.json();
                 this.showToast('Contraseña guardada correctamente', 'success');
                 this.passwordLabel.value = '';
                 this.loadSavedPasswords();
             } else {
-                // console.error('Error del servidor:', response.status, data);
-                this.showToast(data.error || `Error del servidor (${response.status})`, 'error');
+                const errorData = await response.json();
+                console.error('Save error:', response.status, errorData);
+                this.showToast(errorData.error || `Error del servidor (${response.status})`, 'error');
             }
         } catch (error) {
-            // console.error('Error de conexión:', error);
+            console.error('Network error:', error);
             this.showToast('Error de conexión con el servidor', 'error');
         } finally {
             this.savePassword.disabled = false;
@@ -998,7 +985,6 @@ class ReadablePasswordManager {
 
     async loadSavedPasswords() {
         try {
-            // console.log('Cargando contraseñas guardadas...');
             const response = await fetch(`${this.apiBase}/passwords`, {
                 headers: {
                     'Authorization': `Bearer ${this.token}`
@@ -1007,84 +993,17 @@ class ReadablePasswordManager {
 
             if (response.ok) {
                 this.savedPasswords = await response.json();
-                // console.log('Contraseñas cargadas:', this.savedPasswords.length);
+                console.log('Contraseñas cargadas:', this.savedPasswords.length);
                 this.displaySavedPasswords();
             } else {
-                // console.error('Error cargando contraseñas:', response.status);
+                const errorData = await response.json();
+                console.error('Load error:', response.status, errorData);
                 this.showToast('Error al cargar contraseñas', 'error');
             }
         } catch (error) {
-            // console.error('Error de conexión cargando contraseñas:', error);
+            console.error('Network error loading passwords:', error);
             this.showToast('Error de conexión al cargar contraseñas', 'error');
         }
-    }
-
-    displaySavedPasswords(passwords = this.savedPasswords) {
-        this.passwordsList.innerHTML = '';
-
-        if (passwords.length === 0) {
-            this.passwordsList.innerHTML = '<div class="loading">No hay contraseñas guardadas</div>';
-            return;
-        }
-
-        passwords.forEach(password => {
-            const item = this.createPasswordItem(password);
-            this.passwordsList.appendChild(item);
-        });
-    }
-
-    createPasswordItem(password) {
-        const template = this.passwordItemTemplate.content.cloneNode(true);
-        const item = template.querySelector('.password-item');
-        
-        // Set data
-        item.querySelector('.password-label').textContent = password.label;
-        item.querySelector('.field-value').textContent = password.password;
-        item.querySelector('.created-date').textContent = new Date(password.createdAt).toLocaleDateString();
-        
-        // Set strength badge
-        const strengthBadge = item.querySelector('.strength-badge');
-        const score = password.strengthScore;
-        if (score >= 80) {
-            strengthBadge.textContent = 'Muy fuerte';
-            strengthBadge.style.background = '#4caf50';
-            strengthBadge.style.color = 'white';
-        } else if (score >= 60) {
-            strengthBadge.textContent = 'Fuerte';
-            strengthBadge.style.background = '#ff9800';
-            strengthBadge.style.color = 'white';
-        } else if (score >= 40) {
-            strengthBadge.textContent = 'Media';
-            strengthBadge.style.background = '#ffeb3b';
-            strengthBadge.style.color = 'black';
-        } else {
-            strengthBadge.textContent = 'Débil';
-            strengthBadge.style.background = '#f44336';
-            strengthBadge.style.color = 'white';
-        }
-
-        // Bind events
-        item.querySelector('.copy-password-btn').addEventListener('click', () => {
-            this.copyToClipboard(password.password, 'Contraseña copiada');
-        });
-        
-        item.querySelector('.toggle-visibility').addEventListener('click', (e) => {
-            const passwordField = item.querySelector('.field-value');
-            const button = e.target;
-            if (passwordField.textContent === '••••••••') {
-                passwordField.textContent = password.password;
-                button.textContent = '🙈';
-            } else {
-                passwordField.textContent = '••••••••';
-                button.textContent = '👁️';
-            }
-        });
-        
-        item.querySelector('.delete-btn').addEventListener('click', () => {
-            this.deletePassword(password.id);
-        });
-
-        return item;
     }
 
     async deletePassword(passwordId) {
@@ -1104,10 +1023,12 @@ class ReadablePasswordManager {
                 this.showToast('Contraseña eliminada', 'success');
                 this.loadSavedPasswords();
             } else {
+                const errorData = await response.json();
+                console.error('Delete error:', response.status, errorData);
                 this.showToast('Error al eliminar contraseña', 'error');
             }
         } catch (error) {
-            // console.error('Delete password error:', error);
+            console.error('Network error deleting password:', error);
             this.showToast('Error de conexión', 'error');
         }
     }
