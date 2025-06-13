@@ -2,7 +2,7 @@ class AuthManager {
     constructor() {
         this.token = localStorage.getItem('auth_token');
         // PRODUCTION: Replace with your actual Render backend URL
-        this.apiBase = 'https://your-backend-app-name.onrender.com/api';
+        this.apiBase = 'https://readablepasswords.onrender.com/api';
         
         this.initializeElements();
         this.bindEvents();
@@ -71,7 +71,7 @@ class AuthManager {
         errorDiv.innerHTML = `
             <strong>❌ Error de Conexión</strong><br>
             No se puede conectar al servidor.<br>
-            <small>Asegúrate de que el servidor esté ejecutándose en localhost:3000</small>
+            <small>Verifica que el servidor esté funcionando correctamente</small>
         `;
         document.body.appendChild(errorDiv);
 
@@ -155,8 +155,7 @@ class AuthManager {
                 alert(data.error || 'Error al registrar usuario');
             }
         } catch (error) {
-            // console.error('Registration error:', error);
-            alert('Error de conexión. Verifica que el servidor esté ejecutándose.');
+            alert('Error de conexión con el servidor');
         }
     }
 
@@ -184,8 +183,7 @@ class AuthManager {
                 alert(data.error || 'Email o contraseña incorrectos');
             }
         } catch (error) {
-            // console.error('Login error:', error);
-            alert('Error de conexión. Verifica que el servidor esté ejecutándose.');
+            alert('Error de conexión con el servidor');
         }
     }
 
