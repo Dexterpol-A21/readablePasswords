@@ -21,12 +21,18 @@ const pool = new Pool({
 // Enhanced CORS configuration for production
 app.use(cors({
     origin: [
+        // Development URLs (mantener para desarrollo local)
         'http://localhost:3000', 
         'http://127.0.0.1:3000', 
         'http://localhost:5500', 
         'http://127.0.0.1:5500',
-        'https://your-domain.com', // Replace with your Hostinger domain
-        'https://www.your-domain.com' // Replace with your Hostinger domain
+        
+        // Production URLs
+        'https://readablepasswords.onrender.com', // Backend URL (para servir frontend desde backend)
+        
+        // Hostinger URLs - REEMPLAZA CON TU DOMINIO REAL
+        'https://lightslategrey-tarsier-553107.hostingersite.com',
+        'https://www.lightslategrey-tarsier-553107.hostingersite.com'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
