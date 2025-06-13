@@ -1,7 +1,7 @@
 class ReadablePasswordManager {
     constructor() {
         this.token = localStorage.getItem('auth_token');
-        // PRODUCTION: Updated URL for Render backend
+        // PRODUCTION: URL correcta para Render backend
         this.apiBase = 'https://readablepasswords.onrender.com/api';
         this.currentUser = null;
         this.savedPasswords = [];
@@ -1132,6 +1132,61 @@ class ReadablePasswordManager {
         ];
         
         return predictablePatterns.includes(str);
+    }
+
+    async logout() {
+        localStorage.removeItem('auth_token');
+        window.location.href = 'index.html';
+    }
+
+    toggleEducationalSection() {
+        if (this.educationalContent) {
+            if (this.educationalContent.classList.contains('hidden')) {
+                this.educationalContent.classList.remove('hidden');
+                this.toggleEducationBtn.textContent = '📚 Ocultar explicación técnica';
+            } else {
+                this.educationalContent.classList.add('hidden');
+                this.toggleEducationBtn.textContent = '📚 ¿Cómo funciona esta aplicación?';
+            }
+        }
+    }
+
+    getRandomElement(array) {
+        return array[Math.floor(Math.random() * array.length)];
+    }
+
+    copyToClipboard(text, message) {
+        navigator.clipboard.writeText(text).then(() => {
+            this.showToast(message, 'success');
+        }).catch(() => {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                this.showToast(message, 'success');
+            } catch (err) {
+                this.showToast('Error al copiar al portapeles', 'error');
+            }
+            document.body.removeChild(textArea);
+        });
+    }
+
+    showToast(message, type = 'info') {
+        if (this.toast && this.toastMessage) {
+            this.toastMessage.textContent = message;
+            this.toast.className = `toast ${type}`;
+            this.toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                this.toast.classList.add('hidden');
+            }, 3000);
+        } else {
+            console.log('Toast:', message);
+        }
     }
 }
 
