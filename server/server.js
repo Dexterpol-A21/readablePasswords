@@ -21,20 +21,8 @@ const pool = new Pool({
 // CORS configuration - SOLO para Backend API
 app.use(cors({
     origin: [
-        // Development URLs
-        'http://localhost:3000', 
-        'http://127.0.0.1:3000', 
-        'http://localhost:5500', 
-        'http://127.0.0.1:5500',
-        
-        // Tu frontend en Hostinger (CAMBIA por tu dominio real)
-        'https://lightslategrey-tarsier-553107.hostingersite.com',
-        'https://www.lightslategrey-tarsier-553107.hostingersite.com',
-        'http://lightslategrey-tarsier-553107.hostingersite.com',
-        'http://www.lightslategrey-tarsier-553107.hostingersite.com',
-        
-        // Solo si necesitas que Render sirva archivos estáticos de prueba
-        'https://readablepasswords.onrender.com'
+        'https://lightslategrey-tarsier-553107.hostingersite.com', // ✅ Permitir tu frontend
+        'https://readablepasswords.onrender.com' // ✅ Solo para pruebas si es necesario
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
