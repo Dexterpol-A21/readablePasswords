@@ -88,23 +88,45 @@ function encrypt(text) {
         encrypted += cipher.final('hex');
         return iv.toString('hex') + ':' + encrypted;
     } catch (error) {
-        console.error('Encryption error:', error);
+        console.error('Encryption error:', error.message, error.stack); // Log stack
         throw new Error('Failed to encrypt password');
     }
 }
 
 function decrypt(text) {
+    console.log(`Attempting to decrypt: ${text ? text.substring(0, 40) + '...' : 'null or empty text'}`); // Log input
+    if (!text || typeof text !== 'string' || !text.includes(':')) {
+        console.error('Decryption error: Invalid input format. Text:', text);
+        // Option 1: Throw an error to indicate failure for this specific password
+        // throw new Error('Invalid encrypted text format');
+        // Option 2: Return a placeholder or null if you want to skip this password
+        return "[Decryption Error: Invalid Format]";
+    }
+
     try {
         const textParts = text.split(':');
+        if (textParts.length < 2) { // Ensure IV and data are present
+            console.error('Decryption error: Malformed encrypted text, missing IV or data. Parts:', textParts.length);
+            return "[Decryption Error: Malformed Data]";
+        }
         const iv = Buffer.from(textParts.shift(), 'hex');
         const encryptedText = textParts.join(':');
+        
+        if (iv.length !== IV_LENGTH) {
+            console.error(`Decryption error: IV length is incorrect. Expected ${IV_LENGTH}, got ${iv.length}`);
+            return "[Decryption Error: Invalid IV Length]";
+        }
+
         const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
         let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
     } catch (error) {
-        console.error('Decryption error:', error);
-        throw new Error('Failed to decrypt password');
+        console.error('Decryption error during crypto operation:', error.message, error.stack); // Log stack
+        // Option 1: Re-throw if you want the main handler to catch it
+        // throw new Error('Failed to decrypt password due to crypto error');
+        // Option 2: Return a placeholder
+        return "[Decryption Error: Crypto Operation Failed]";
     }
 }
 
@@ -214,19 +236,33 @@ app.get('/api/passwords', authenticateToken, async (req, res) => {
             [req.user.userId]
         );
 
-        const passwords = result.rows.map(row => ({
-            id: row.id,
-            label: row.label,
-            password: decrypt(row.password_encrypted),
-            phoneticText: row.phonetic_text,
-            strengthScore: row.strength_score,
-            createdAt: row.created_at
-        }));
+        const passwords = result.rows.map(row => {
+            let decryptedPassword;
+            try {
+                if (!row.password_encrypted) {
+                    console.warn(`Password ID ${row.id} for user ${req.user.userId} has null/empty encrypted_password.`);
+                    decryptedPassword = "[Encrypted Data Missing]";
+                } else {
+                    decryptedPassword = decrypt(row.password_encrypted);
+                }
+            } catch (decryptError) {
+                console.error(`Failed to decrypt password ID ${row.id} for user ${req.user.userId}:`, decryptError.message);
+                decryptedPassword = "[Decryption Failed]"; // Placeholder for frontend
+            }
+            return {
+                id: row.id,
+                label: row.label,
+                password: decryptedPassword, // Use the potentially modified password
+                phoneticText: row.phonetic_text,
+                strengthScore: row.strength_score,
+                createdAt: row.created_at
+            };
+        });
 
         res.json(passwords);
     } catch (error) {
-        console.error('Get passwords error:', error);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Get passwords error in route handler:', error.message, error.stack); // Log stack
+        res.status(500).json({ error: 'Server error while fetching passwords' });
     }
 });
 
