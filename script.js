@@ -2,7 +2,7 @@ class AuthManager {
     constructor() {
         this.token = localStorage.getItem('auth_token');
         // PRODUCTION: URL correcta para Render backend (mantener igual)
-        this.apiBase = 'http://readablepasswords.site/api';
+        this.apiBase = 'https://readablepasswords.onrender.com/api';
         
         this.initializeElements();
         this.bindEvents();
