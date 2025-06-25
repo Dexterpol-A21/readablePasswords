@@ -21,9 +21,8 @@ const pool = new Pool({
 // CORS configuration - Actualizado para Hostinger
 app.use(cors({
     origin: [
-        'https://salmon-dolphin-841207.hostingersite.com', // ✅ Nuevo dominio de Hostinger
-        'https://www.salmon-dolphin-841207.hostingersite.com', // ✅ Con www
-        'https://lightslategrey-tarsier-553107.hostingersite.com', // ✅ Dominio anterior (mantener por compatibilidad)
+        'https://readablepasswords.site', // ✅ Nuevo dominio de Hostinger
+        'https://www.http://readablepasswords.site', // ✅ Con www // 
         'https://readablepasswords.onrender.com' // ✅ Backend para pruebas
     ],
     credentials: true,
