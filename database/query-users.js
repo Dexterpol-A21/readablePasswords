@@ -1,3 +1,10 @@
+// To run this script:
+// 1. Navigate to the root of your project: cd ~/OneDrive/Documentos/disenoWeb/PassPalabra
+//    Then run: node database/query-users.js
+// OR
+// 2. Navigate to this directory: cd ~/OneDrive/Documentos/disenoWeb/PassPalabra/database
+//    Then run: node query-users.js
+
 const { Pool } = require('pg');
 require('dotenv').config({ path: '../server/.env' });
 

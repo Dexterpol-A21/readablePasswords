@@ -1,3 +1,13 @@
+-- Drop existing tables in reverse order of creation due to foreign keys
+DROP TABLE IF EXISTS user_sessions;
+DROP TABLE IF EXISTS saved_passwords;
+DROP TABLE IF EXISTS users;
+
+-- Drop existing functions and triggers if they exist
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+DROP TRIGGER IF EXISTS update_saved_passwords_updated_at ON saved_passwords;
+DROP FUNCTION IF EXISTS update_updated_at_column();
+
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,

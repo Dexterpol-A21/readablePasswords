@@ -18,29 +18,39 @@ const pool = new Pool({
     }
 });
 
-// CORS configuration - SOLO para Backend API
+// CORS configuration - Actualizado para Hostinger
 app.use(cors({
     origin: [
-        'https://lightslategrey-tarsier-553107.hostingersite.com', // ✅ Permitir tu frontend
-        'https://readablepasswords.onrender.com' // ✅ Solo para pruebas si es necesario
+        'https://salmon-dolphin-841207.hostingersite.com', // ✅ Nuevo dominio de Hostinger
+        'https://www.salmon-dolphin-841207.hostingersite.com', // ✅ Con www
+        'https://lightslategrey-tarsier-553107.hostingersite.com', // ✅ Dominio anterior (mantener por compatibilidad)
+        'https://readablepasswords.onrender.com' // ✅ Backend para pruebas
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
 }));
 
-// Middleware adicional para headers CORS
+// Middleware adicional para headers CORS - Actualizado
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     const allowedOrigins = [
+        // Desarrollo local
         'http://localhost:3000', 
         'http://127.0.0.1:3000', 
         'http://localhost:5500', 
         'http://127.0.0.1:5500',
+        // Hostinger nuevo dominio
+        'https://salmon-dolphin-841207.hostingersite.com',
+        'https://www.salmon-dolphin-841207.hostingersite.com',
+        'http://salmon-dolphin-841207.hostingersite.com',
+        'http://www.salmon-dolphin-841207.hostingersite.com',
+        // Hostinger dominio anterior (mantener)
         'https://lightslategrey-tarsier-553107.hostingersite.com',
         'https://www.lightslategrey-tarsier-553107.hostingersite.com',
         'http://lightslategrey-tarsier-553107.hostingersite.com',
         'http://www.lightslategrey-tarsier-553107.hostingersite.com',
+        // Backend Render
         'https://readablepasswords.onrender.com'
     ];
     
@@ -425,7 +435,7 @@ app.use((req, res) => {
 app.listen(PORT, async () => {
     console.log(`🚀 API Server running on http://localhost:${PORT}`);
     console.log(`🌐 CORS enabled for frontend domains`);
-    console.log(`🔗 Frontend allowed: lightslategrey-tarsier-553107.hostingersite.com`);
+    console.log(`🔗 Frontend allowed: salmon-dolphin-841207.hostingersite.com`); // Actualizado
     console.log(`📡 Backend API URL: https://readablepasswords.onrender.com`);
     
     // Validate encryption key
