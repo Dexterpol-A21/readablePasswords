@@ -509,9 +509,4 @@ async function createTablesIfNotExist() {
         console.error('❌ Error creating tables:', error.message);
     }
 }
-        console.log('✅ All database tables are ready');
-        
-    } catch (error) {
-        console.error('❌ Error creating tables:', error.message);
-    }
-}
+
