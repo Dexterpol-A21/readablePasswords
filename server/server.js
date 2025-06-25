@@ -21,8 +21,9 @@ const pool = new Pool({
 // CORS configuration - Actualizado para Hostinger
 app.use(cors({
     origin: [
-        'https://readablepasswords.site', // ✅ Nuevo dominio de Hostinger
-        'https://www.http://readablepasswords.site', // ✅ Con www // 
+        'http://readablepasswords.site', // ✅ Nuevo dominio
+        'https://readablepasswords.site', // ✅ Versión HTTPS
+        'https://www.readablepasswords.site', // ✅ Con www
         'https://readablepasswords.onrender.com' // ✅ Backend para pruebas
     ],
     credentials: true,
@@ -39,16 +40,10 @@ app.use((req, res, next) => {
         'http://127.0.0.1:3000', 
         'http://localhost:5500', 
         'http://127.0.0.1:5500',
-        // Hostinger nuevo dominio
-        'https://salmon-dolphin-841207.hostingersite.com',
-        'https://www.salmon-dolphin-841207.hostingersite.com',
-        'http://salmon-dolphin-841207.hostingersite.com',
-        'http://www.salmon-dolphin-841207.hostingersite.com',
-        // Hostinger dominio anterior (mantener)
-        'https://lightslategrey-tarsier-553107.hostingersite.com',
-        'https://www.lightslategrey-tarsier-553107.hostingersite.com',
-        'http://lightslategrey-tarsier-553107.hostingersite.com',
-        'http://www.lightslategrey-tarsier-553107.hostingersite.com',
+        // Nuevo dominio
+        'http://readablepasswords.site',
+        'https://readablepasswords.site',
+        'https://www.readablepasswords.site',
         // Backend Render
         'https://readablepasswords.onrender.com'
     ];
@@ -508,6 +503,12 @@ async function createTablesIfNotExist() {
             console.log('✅ Saved_passwords table created');
         }
         
+        console.log('✅ All database tables are ready');
+        
+    } catch (error) {
+        console.error('❌ Error creating tables:', error.message);
+    }
+}
         console.log('✅ All database tables are ready');
         
     } catch (error) {
